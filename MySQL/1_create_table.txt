@@ -1,0 +1,99 @@
+
+CREATE TABLE CUSTOMER
+(
+cust_id                INT               NOT NULL,        
+first_name             VARCHAR(15)       NOT NULL,
+last_name              VARCHAR(15)       NOT NULL,
+street                 VARCHAR(50),
+city                   VARCHAR(15),
+state                  VARCHAR(15),
+zip                    INT,
+PRIMARY KEY(cust_id)
+);
+
+
+CREATE TABLE REWARDS
+(
+r_id                INT      NOT NULL,
+points              INT,
+cust_id    			INT,
+PRIMARY KEY(r_id),
+FOREIGN KEY(cust_id) REFERENCES CUSTOMER(cust_id)
+);
+
+
+CREATE TABLE CUSTOMER_PHONE 
+(
+cust_id   INT      NOT NULL,
+phone     INT(10),
+PRIMARY KEY(cust_id, phone),
+FOREIGN KEY(cust_id) REFERENCES CUSTOMERcustomer_phone_ibfk_1(cust_id)
+);
+
+
+CREATE TABLE CONTRACTOR 
+(
+bus_name   CHAR(15)     NOT NULL,
+discount   DOUBLE       NOT NULL,
+PRIMARY KEY(bus_name),
+UNIQUE(bus_name)
+);
+
+
+
+
+CREATE TABLE CONTRACTOR_PHONE
+(
+bus_name     char(15)     NOT NULL,
+phone        int(10),
+PRIMARY KEY(bus_name),
+FOREIGN KEY(bus_name) REFERENCES CONTRACTOR(bus_name)
+);
+
+
+CREATE TABLE HIRE 
+(
+cust_id         INT          NOT NULL,
+bus_name        CHAR(15)     NOT NULL,
+hours           DOUBLE,
+
+PRIMARY KEY(cust_id, bus_name),
+FOREIGN KEY(cust_id) REFERENCES CUSTOMER(cust_id),
+FOREIGN KEY(bus_name) REFERENCES CONTRACTOR(bus_name)
+);
+
+
+CREATE TABLE ROOM (
+room_name       VARCHAR(15)       NOT NULL,
+cust_id         INT               NOT NULL,
+
+PRIMARY KEY(room_name, cust_id),
+FOREIGN KEY(cust_id) REFERENCES CUSTOMER(cust_id)
+);
+
+
+CREATE TABLE PAINT_COLOR 
+(
+mfg_id         INT             NOT NULL,
+color_id       INT             NOT NULL,
+color_name     VARCHAR(15),
+
+PRIMARY KEY(mfg_id, color_id)
+);
+
+
+CREATE TABLE PAINTED
+(
+rm_name          VARCHAR(15)       NOT NULL,
+cust_id          INT               NOT NULL,
+mfg_id           INT               NOT NULL,
+color_id         INT               NOT NULL,
+PRIMARY KEY(rm_name, cust_id, mfg_id, color_id),
+FOREIGN KEY(rm_name) REFERENCES ROOM(room_name),
+FOREIGN KEY(cust_id) REFERENCES CUSTOMER(cust_id),
+FOREIGN KEY(mfg_id, color_id) REFERENCES PAINT_COLOR(mfg_id, color_id)
+
+);
+
+
+
