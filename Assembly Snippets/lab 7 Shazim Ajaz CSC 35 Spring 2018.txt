@@ -1,0 +1,628 @@
+;Shazim Ajaz
+;CSC 35 Spring 2018
+;Issac Ghansah
+;Lab 07
+;This lab provides several input and output functions that
+;work similar to the Irvine Library   
+
+.model small
+.STACK 100h
+.data
+    
+    TestString01	DB  	"***********************************",0dh,0ah,"*    PROGRAM 5 TESTING PROCEDURE  *",0dh,0ah, "***********************************",0dh,0ah, '$'
+
+
+    TestString02	DB	"WriteBin: Printing a binary number....: ",'$' 
+    
+    TestString03	DB	"ReadChar: Type an ASCII character.....: ", '$'
+    
+    TestString04	DB	"Writechar: That character was.........: ", '$'
+    
+    TestString05	DB	"ReadString: Type an ASCII String......: " , '$'
+    
+    TestString06	DB	"WriteString...........................: ", '$'
+    
+    TestString07	DB	"ReadDec: Type a 16bit Decimal number..: ",'$'
+    
+    TestString08	DB	"WriteDec: The Number was..............: ",'$'
+    
+    TestString09	DB	"ReadHex: Type a 16bit Hex number......: ", '$'
+    
+    TestString10	DB	"WriteHex:The Number was...............: ", '$'
+    
+    TestString11	DB	"WriteDec: Number of Characters Typed..: ",'$'
+
+    buffer DB	100 DUP ('$')
+    tester dw ?
+
+.code
+main PROC
+    
+    mov ax ,@data
+
+    mov ds,ax
+                                                     
+    call clrscr                         ;Clear the Screen
+    mov dx, offset TestString01         ;First Large Prompt/Header
+    call writestring
+    call crlf
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    call crlf
+    mov dx, offset TestString03         ;Prompt to Test ReadChar
+    call WriteString;
+    call Readchar                       ; Reads Filtered Char into AL
+    call crlf
+    mov dx, offset TestString04         ;Prompt for WriteChar
+    call WriteString
+    call Writechar                      ; Writes ASCII char in AL to Screen
+    call crlf
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    call crlf
+    mov dx, offset TestString05         ;Prompt for ReadString
+    call WriteString;
+    mov dx, offset buffer               ; Where to store the read-in-String
+    mov cx, 9
+    call ReadString                     ;Stores typed string to where DX points
+    call crlf
+    mov dx, offset TestString11         ; Prompt for WriteDec, which will
+    call WriteString                    ; print out the number of characters typed
+    Call WriteDec
+    Call Crlf
+    mov dx, offset TestString06         ; Print out the string that was entered
+    call WriteString;                   ; uses DX register for source
+    mov dx, offset buffer
+
+
+
+
+    call writeString
+    call crlf
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    call crlf
+    mov dx, offset TestString07         ;Prompt for ReadDec Test
+    call WriteString;
+    call ReadDec                        ; puts value in AX
+    call crlf
+    mov dx, offset TestString08         ; Prompt for WriteDec Test
+    call WriteString;
+    call WriteDec                       ; Print AX register in Decimal
+    call crlf
+    mov dx, offset TestString02         ; Prompt for WriteBin test
+    call WriteString;
+    call writebin                       ; Prints AX register in Binary
+    call crlf
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    call crlf
+    mov dx, offset TestString09         ; Prompt for READHEX
+    call WriteString;
+    call ReadHex
+    call crlf
+    mov dx, offset TestString10         ; Prompt for WRITEHEX
+    call WriteString;
+    call WriteHex                       ; Prints AX register in Hexidecimal
+    
+
+
+    mov ax, 4c00h
+
+    int 21h
+
+
+main ENDP
+
+
+;*****************PART A****************************
+;A1: This procedure moves the cursor to the next line.
+Crlf PROC
+    
+    ;Securing the values of the registers in the stack
+    push ax
+    push bx
+    push cx
+    push dx
+    push si
+    push di
+    
+    MOV AX, 0
+    MOV DX, 0
+    MOV DL, 0ah
+    MOV AH, 06h
+    INT 21h
+
+    MOV DL, 0dh
+    MOV AH, 06h
+    INT 21h 
+    
+    ;Restoring the values of the registers to the previous states 
+    pop di
+    pop si
+    pop dx
+    pop cx
+    pop bx
+    pop ax
+    
+    
+    
+RET
+
+Crlf ENDP
+
+;A2: This procedure writes the decimal digit to the screen
+;The value that it will print shall be stored in the AX register
+WriteDec PROC
+      push ax
+      push bx
+      push cx
+      push dx
+      push si
+      push di
+      
+      
+      
+      MOV CX, 0
+      
+      ;This loop gets the counter as the number of digits
+   step1:   
+      MOV DX, 0
+      MOV BX, 10
+      DIV BX
+      ADD DX, 0x30
+      PUSH DX; pushing the remainder in stack
+      INC CX
+      CMP AX, 0 ;Checking to see if the quiotent is zero
+      JNZ step1
+      
+      ;This loop prints values of w on the screen
+   step2:
+      MOV DX, 0
+      POP DX
+      MOV AX, 0
+      MOV AH, 06h
+      INT 21h
+      LOOP step2 
+      
+      pop di
+      pop si
+      pop dx
+      pop cx
+      pop bx
+      pop ax
+         
+RET
+WriteDec ENDP
+
+;A3: WriteBin: Writes binary integer to screen in ASCII binary format
+;Binary digits are displayed in groups of four for easy reading; The pre
+; conditiion is that the value shall be stored in the al register and
+; be kept as binary. Any other type of value may result in error. 
+
+WriteBin PROC
+    
+    ;Securing all the registers in the stack
+    push ax
+    push bx
+    push cx
+    push dx
+    push si
+    push di
+    
+    ;here si will serve as a counter
+    MOV SI, 0
+    MOV BX, AX
+    beg:
+    SHR BX, 1
+    MOV CX, 0
+    ADC CX, 0
+    PUSH CX
+    INC SI
+    CMP BX, 00000000b
+    JE point2
+    JMP beg:
+    
+point2:
+    ;From here the si holds the value of the counter. 
+    MOV DI, 0
+    MOV CX, SI
+    point3:
+    MOV AX, 0
+    POP AX
+    MOV DX, AX
+    ADD DX, 30h
+    MOV AH, 06h
+    INT 21h
+    INC DI
+    
+    CMP DI, 4
+    JNE point4
+        
+        MOV DX, 20h
+        MOV AH, 06h
+        INT 21h
+        MOV DI, 0
+        
+    
+    point4:
+    LOOP point3
+    
+    ;Restoring the registers
+    pop di
+    pop si
+    pop dx
+    pop cx
+    pop bx
+    pop ax
+
+RET
+WriteBin ENDP
+
+;A4: This procedures writes a character that is in AL on the screen
+WriteChar PROC
+    
+    ;Securing the register
+    push ax
+    push bx
+    push cx
+    push dx
+    push si
+    push di
+    
+    
+    MOV DX, 0
+    MOV DL, AL
+    MOV AH, 06h
+    INT 21h  
+    
+    
+    ;Restoring the register
+    pop di
+    pop si
+    pop dx
+    pop cx
+    pop bx
+    pop ax
+    
+
+RET
+WriteChar ENDP
+
+
+
+
+;**************END PART A****************************
+
+
+;*****************PART B******************************
+;B1: ClrScr ; this procedure clears the entire scree
+;Code is used from the document provided by the instructor
+;The credit for the code in this procedure goes to the instructor.
+ClrScr PROC
+    
+    ;Securing the register
+    push ax
+    push bx
+    push cx
+    push dx
+    push si
+    push di
+    
+    MOV AH, 06h
+    MOV AL, 0
+    MOV CH, 0
+    MOV CL, 0
+    MOV DH, 24
+    MOV DL, 79
+    MOV BH, 7
+    INT 10h
+    
+    ;restoring the registers
+    pop di
+    pop si
+    pop dx
+    pop cx
+    pop bx
+    pop ax
+    
+    
+
+RET
+ClrScr ENDP
+
+
+;This reads a single character that is typed by the user and stores it
+;in the al register after clearing out rest of the ax register
+readChar PROC
+    
+    
+    step6:
+    mov ah, 06h
+    mov dx, 0ffh
+    int 21h
+    jz step6
+    
+    mov dx, 0
+    mov bx, 0
+    mov bl, al
+    mov dl, al
+    mov ah, 06h
+    int 21h
+    
+    mov ax, bx 
+    
+
+
+RET
+readChar ENDP
+
+
+;Reads String from the user
+readString PROC
+    
+    
+    MOV CX, 0
+    MOV SI, dx
+    up:
+    call readChar
+    CMP AL, 0dh
+    JE down
+    MOV [SI], AL
+    INC SI
+    INC CX
+    JMP up
+
+
+down:
+    mov ax, cx 
+
+RET
+readString ENDP
+
+writeString PROC    
+;This method writes the string on the screen whose address is in dx
+    
+    
+    ;Saving the register values
+    push ax
+    push bx
+    push cx
+    push dx
+    push si
+    push di
+
+    MOV SI, DX
+    Point8:
+
+    CMP [SI], '$'
+    MOV DX, [SI]
+    JE point9
+    MOV AH, 06h
+    INT 21h
+    INC SI
+    JMP Point8 
+Point9:    
+     
+     ;restoring the register values to start
+    pop di
+    pop si
+    pop dx
+    pop cx
+    pop bx
+    pop ax
+     
+RET
+writeString ENDP
+;******************************{END PART B}**********************************
+
+; **************************{PART C}*******************************************
+
+;This procedure reads an unsigned demical value entered by the user 
+;and then returns the value in the ax register. 
+
+ReadDec PROC
+    
+    
+    MOV AX, 0
+    MOV BX, 0
+    MOV CX, 0
+    MOV DX, 0 
+    MOV SI, 0
+    MOV DI, 0
+    L1:
+    call readChar
+
+    ;comparing if the enter is pressed
+    CMP AL, 0dh
+    JE close
+    MOV AH, 0
+    MOV SI, AX
+    SUB SI, 30h
+    MOV AX, DI
+    MOV BX, 10
+    MUL BX
+    ADD AX, SI
+    MOV DI, AX
+    CMP SI, 0dh
+    JNE L1
+    
+   
+close:
+    MOV AX, DI
+
+
+
+RET
+ReadDec ENDP
+
+;This procedure reads hexdecimal values from the keyboard. The result is then
+;stored in ax.
+readHex PROC
+    
+    mov di, 0 
+    mov ah, 0
+    mov si, ax 
+     
+    
+    above2:
+    ;reading the character from the screen
+    call readChar ; in ax
+    
+    ;check if greater than 0
+    cmp ax, 'h'
+    je close2:
+    
+    ;if(x < 58d) then its a decimal alread below 9
+    cmp ax, 58d
+    jb decimal
+     
+    
+    ;else if ( x < 71 d) then its an upper case
+    cmp ax, 71d
+    jb upperCase
+    
+    
+    ;else it is lower case
+    ;covert it to upper case
+    sub ax, 32d
+    jmp upperCase:
+    
+    
+    
+    
+    decimal: 
+    sub ax, 30h
+    ;after this ax will hold value in decimal
+    jmp finalStep
+    
+    
+    
+    upperCase:
+    ;Any value coming in at this point will be upper case
+    ;converting the value to decimal
+    sub ax, 37h
+    jmp finalStep
+    
+    
+    
+    finalStep:
+    mov bx, 16
+    mov si, ax
+    mov ax, di
+    mul bx
+    add ax, si
+    mov di, ax
+    mov ax, 0
+    
+    
+    
+    
+    
+    
+    
+    jmp above2 
+    
+    mov ax, di
+            
+close2:
+    mov ax, di 
+ret
+readHex ENDP
+
+;This prorcedures writes hex values on the screen which were stored initally in the ax register
+writeHex PROC
+    mov cx, 0
+    ;Assuming the desired parameter of value is in ax
+    mov di, ax
+    rep4:
+
+
+    mov ax, di
+    cmp di, 0
+    je close4
+    mov bx, 10h
+    mov dx, 0
+    div bx
+    ;the remainder will go dx
+    ;if the raminder is larger than 9 then jump to hexValues 
+    mov di, ax
+    mov si, dx
+    cmp si, 9
+    ja hexValues
+    
+    ;at this point this has values between 0 -9
+    add si, 30h
+    mov ax , si
+    inc cx
+    push si
+    
+    jmp rep4:
+    
+    
+    
+    hexValues:
+        ;Checking if it is 10
+        cmp si, 10d
+        jne check11
+        mov bx, 'A'
+        push bx
+        inc cx
+        jmp rep4:
+        
+        check11:
+        cmp si, 11d
+        jne check12
+        mov bx, 'B'
+        push bx
+        inc cx 
+        jmp rep4:
+        
+        check12:
+        cmp si, 12d
+        jne check13
+        mov bx, 'C' 
+        push bx
+        inc cx
+        jmp rep4:
+        
+        check13:
+        cmp si, 13d 
+        jne check14
+        mov bx, 'D'
+        push bx
+        inc cx
+        jmp rep4:
+        
+        check14:
+        cmp si, 14d 
+        jne check15
+        mov bx, 'E'
+        push bx
+        inc cx
+        jne check15
+        
+        jmp rep4:
+        
+        check15:
+        cmp si, 15d
+        jne thisPoint
+        mov bx, 'F'
+        push bx
+        inc cx 
+        thisPoint:
+        jmp rep4:    
+    
+close4: 
+
+l4:
+    pop ax
+    call writeChar
+    
+    loop l4   
+ret    
+writeHex ENDP
+
+
+
+END main

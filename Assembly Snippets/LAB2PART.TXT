@@ -1,0 +1,22 @@
+; Shazim Ajaz
+; CSC 35
+;
+.model small
+.stack 100h
+.data
+.code
+main proc
+	mov ax, @data
+	mov dx, ax
+	mov ax, 0FFFh  ; adds 0FFFh to ax register
+	add ax, 1;  adds value of 1 to 0FFFh
+	neg ax ; it will take 2's complement of ax
+	add ax, 2001h  ; add 2001h in ax;
+	mov bl, -1 ; moves -1 to bl
+	add al, bl  ; add bl to al and then stores the value in al
+
+	mov ax, 4c00h
+	int 21h
+
+main endp
+end main

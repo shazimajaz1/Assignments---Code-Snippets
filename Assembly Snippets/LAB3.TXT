@@ -1,0 +1,68 @@
+;Shazim Ajaz
+;CSC 35 SPring 2018 Issac Ghansah
+;Date Created 02/21/18
+;lab 3
+.model small
+.stack 100h
+.data
+	loc dw ?
+	x dw 40
+	y dw 24
+	sum dw ?
+	w dw ?
+	tem dw 0
+
+.code
+main proc
+	mov ax, @data ; set up data segment register
+	mov ds, ax
+       ;Performing loc	= y * 160 + x * 2
+	mov ax, 160 ; moving 160 to ax register
+	mul y	    ; multiplying y with ax register and saving result in ax
+	mov tem, ax ; moving result of the ax register to the tem memory
+	mov ax, 2   ; moving 2 to the ax
+	mul x	    ; multiplying x with ax and storing result in ax.
+	add ax, tem ; adding the values of ax and tem memory and storing the result in ax
+	mov loc, ax ; saving the result of the first expression in loc
+       ;Performing sum = loc/4 + y
+	mov y, 2000 ; set y = 2000
+	dec y	    ; do y = y - 1
+	mov dx, 0   ; mov 0 to dx
+	mov ax, loc ; setting the value of ax = loc
+	mov bx, 16  ; moving 16  to bx
+	div bx	    ; dividing ax by bx and stroign the qutione in ax and remainder in dx
+	mov tem, ax ; Saving the value of ax in tem variable
+	add ax, y   ; adding the value of y to ax
+	; y /4
+	mov sum, ax ; saving the value of ax in sum
+	mov ax, y   ; moving the value of y into ax
+	mov dx, 0   ; moving the value of 0 into dx
+	mov bx, 4   ; moving the value of 4 into bx
+	div bx;     ; diving ax by bx
+	add sum, ax ; adding the value of ax to the sum
+	; doing y /200
+	mov ax, y   ; moving the value of y in ax
+	mov dx, 0   ; moving the value of dx into 0
+	mov bx, 200 ; moving the value of 200 in bx
+	div bx	    ; dividing the ax by bx and the result will go in ax and dx
+	add sum, ax ; adding the value of ax into sum
+	;Performing W = sum % 7 + 5
+	mov dx, 0   ; setting dx = 0
+	mov ax, sum ; ax = sum
+	mov bx, 7   ; bx = 7
+	div bx	    ; divind ax / bx and storing the remainder in dx and qutioent in ax
+	mov ax,  dx ; moving the value of dx to ax
+	add ax, 5   ; adding 5 to ax
+	mov w, ax   ; saving the value of ax in w
+	add al, 30h  ; converting to ascII
+	;Printing the Result On the Screen
+	mov ah, 06h
+	mov dl, al
+	Int 21h
+
+
+
+	mov ax, 4c00h  ; resetting the value of ax as default
+	Int 21h
+	Main endp  ; end of procedure
+		End main   ; end of the main program.

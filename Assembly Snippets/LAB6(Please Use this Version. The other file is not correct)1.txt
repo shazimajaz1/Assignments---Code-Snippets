@@ -1,0 +1,206 @@
+;Shazim Ajaz
+;CSC 35 Lab 6
+;Spring 2018
+;Created On 04/16/2018
+
+.model small
+.STACK 100h
+.data
+    x DW 0
+    y DW 0
+    m1 DB "IInput X: ", "$"
+    M2 DB "IInput Y: ", "$"
+    newLine DB " ", 0dh, 0ah, "$"
+    answer DB "Ouput W = ", "$"
+    prompt DB "Calculating Output", "$"
+    repeat DB "Press Any Key to Restart or Press q to Exit:", "$"
+    
+.code
+main PROC
+    MOV AX, @data
+    MOV DS, AX
+cont:
+    ;Getting the values from the user
+    
+    ;getX
+    mov dx, offset m1; Print the promp
+    call getValue    ; Get the value of x from the user
+    mov x, ax        ; save the returned value into x
+    call nextLine    ; move the control to the nextLine
+    ;getY
+    mov dx, offset m2; Print the prompt 
+    call getValue    ; get the value from the user
+    mov y, ax        ; store the value into x
+    call nextLine    ; move the cursor into nextLine
+
+    ;Performing the Desired Calculations
+    
+    mov ax, x  ; Passing x
+    mov bx, y  ; Passing y
+    CALL calculateW 
+    mov si, ax
+    ;The w will be in ax
+    
+    MOV DX, OFFSET prompt
+    CALL printMessage
+    CALL nextLine
+    ;Printing the Result on the scre
+    mov dx, offset answer
+    call printMessage
+    
+    mov ax, si
+    CALL printW
+    call nextLine
+    
+    ;Checking to see if user wants to continue
+    mov dx, offset repeat
+    call printMessage
+    mov ah, 01
+    int 21h
+    
+    cmp al, 'q'
+    call nextLine
+    call nextLine
+    call nextLine
+    jne cont
+    
+    
+    MOV AX, 4c00h
+    INT 21h
+
+main ENDP
+
+
+;This procedure prints the gets the value from the user
+getValue PROC
+    ;Printing the 
+    call printMessage
+    mov ax, 0
+    mov bx, 0
+    mov cx, 0
+    mov dx, 0 
+    mov si, 0
+    mov di, 0
+    L1:
+    MOV AH, 01
+    INT 21h
+
+    ;comparing if the enter is pressed
+    CMP AL, 0dh
+    JE close
+    MOV AH, 0
+    MOV si, AX
+    SUB si, 30h
+    MOV AX, di
+    MOV BX, 10
+    MUL BX
+    ADD AX, si
+    MOV di, AX
+    CMP si, 0dh
+    JNE L1
+
+close:
+    mov ax, di
+ret
+getValue ENDP
+
+;This procedure prints the prompt stored in dx on the screen
+printMessage PROC
+    MOV AH, 09h
+    INT 21h
+RET
+printMessage ENDP
+
+;This procedure moves the cursor to the nextLine
+nextLine PROC
+    MOV DX, OFFSET newline
+    CALL printMessage
+
+RET
+nextLine ENDP
+
+calculateW PROC
+    ;Here ax have x and bx have
+    mov si, 0
+    mov di, 0  
+    mov cx, bx  
+    mov bx, ax
+    ;Performing loc = y * 160 + x * 2
+    MOV AX, 160
+    MUL cx
+     
+    MOV si, AX
+    MOV AX, 2
+    MUL bx
+    ADD si, AX
+    mov ax, si
+    mov bx, ax
+
+    ;Performing y = 1000 and y-- and sum = loc/16 + Y + Y/4 + Y/200
+    MOV cx, 1000
+    SUB cx, 1
+    
+    ;loc / 16
+    mov ax, bx
+    mov bx, 16
+    div bx
+    mov si, ax
+    
+    mov ax, cx
+    add si, ax
+    mov ax, cx
+    mov bx, 4
+    cwd
+    div bx               
+    add si, ax 
+    
+    add si, 4 
+    mov ax, 0
+    mov ax, si
+    
+    mov di, 7
+    mov dx, 0
+    div di
+    add dx, 5
+    mov ax, dx
+     
+    
+
+    
+
+RET
+calculateW ENDP
+
+;This method prints the value of w on the screen
+printW PROC
+
+      mov cx, 0
+   ;This loop gets the counter as the number of digits
+   step1:   
+      mov dx, 0
+      mov bx, 10
+      div bx
+      add dx, 0x30
+      push dx; pushing the remainder in stack
+      inc cx
+      cmp ax, 0 ;Checking to see if the quiotent is zero
+      jnZ step1
+      
+      
+      
+   ;This loop prints values of w on the screen
+   step2:
+      mov dx, 0
+      pop dx
+      mov ax, 0
+      mov ah, 06h
+      int 21h
+      Loop step2
+    
+                      
+RET
+printW ENDP
+
+
+      END main
+

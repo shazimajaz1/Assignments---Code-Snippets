@@ -1,0 +1,216 @@
+;Shazim Ajaz
+;CSC 35 Lab 6
+;Spring 2018
+;Created On 04/16/2018
+
+.model small
+.STACK 100h
+.data
+    loc DW ?
+    x DW 0
+    y DW 0
+    sum DW ?
+    tem DW 0
+    prev DW 0
+    w dw 0
+    m1 DB "IInput X: ", "$"
+    M2 DB "IInput Y: ", "$"
+    newLine DB " ", 0dh, 0ah, "$"
+    answer DB "Ouput W = ", "$"
+    value DW 0
+    prompt DB "Calculating Output", "$"
+    repeat DB "Press Any Key to Restart or Press q to Exit:", "$"
+
+.code
+main PROC
+    MOV AX, @data
+    MOV DS, AX
+cont:
+    ;Getting the values from the user
+    CALL getX
+    CALL getY
+
+    ;Performing the Desired Calculations
+    CALL calculateW
+
+    ;Printing the Result on the scre
+    CALL printW
+    
+    ;Checking to see if use wants to continue
+    call nextLine
+    mov dx, offset repeat
+    call printMessage
+    mov ah, 01
+    int 21h
+    
+    cmp al, 'q'
+    call nextLine
+    call nextLine
+    call nextLine
+    jne cont
+    
+    
+    MOV AX, 4c00h
+    INT 21h
+
+main ENDP
+
+
+;This procedure prints the gets the value from the user
+getValue PROC
+    MOV AX, 0
+    MOV BX, 0
+    MOV tem, 0
+    MOV value, 0
+L1:
+    MOV AH, 01
+    INT 21h
+
+    ;comparing if the enter is pressed
+    CMP AL, 0dh
+    JE close
+    MOV AH, 0
+    MOV tem, AX
+    SUB tem, 30h
+    MOV AX, value
+    MOV BX, 10
+    MUL BX
+    ADD AX, tem
+    MOV value, AX
+    CMP tem, 0dh
+    JNE L1
+
+close:
+
+    RET
+getValue ENDP
+
+;This procedure prints the prompt stored in dx on the screen
+printMessage PROC
+    MOV AH, 09h
+    INT 21h
+RET
+printMessage ENDP
+
+;This procedure gets the value of x from the user
+getX PROC
+    MOV DX,OFFSET m1
+    CALL printMessage
+
+    CALL getValue
+    MOV AX, value
+    MOV x, AX
+    CALL nextLine
+
+RET
+getX ENDP
+
+;This procedure gets the value of y from the user
+getY PROC
+    MOV DX, OFFSET m2
+    CALL printmessage
+
+    CALL getValue
+    MOV AX, value
+    mov y, ax
+    CALL nextLine
+
+RET
+getY ENDP
+
+;This procedure moves the cursor to the nextLine
+nextLine PROC
+    MOV DX, OFFSET newline
+    CALL printMessage
+
+RET
+nextLine ENDP
+
+calculateW PROC
+
+    ;Performing loc = y * 160 + x * 2
+    MOV AX, 160
+    MUL y
+
+    MOV tem, AX
+    MOV AX, 2
+    MUL x
+    ADD tem, AX
+    mov ax, tem
+    mov loc, ax
+
+    ;Performing y = 1000 and y-- and sum = loc/16 + Y + Y/4 + Y/200
+    MOV y, 1000
+    SUB y, 1
+    
+    ;loc / 16
+    mov ax, loc
+    mov bx, 16
+    div bx
+    mov tem, ax
+    
+    mov ax, y
+    add tem, ax
+    mov ax, y
+    mov bx, 4
+    cwd
+    div bx               
+    add tem, ax 
+    
+    add tem, 4 
+    mov ax, 0
+    mov ax, tem
+    
+    mov value, 7
+    mov dx, 0
+    div value
+    add dx, 5
+    mov w, dx
+     
+    
+
+    MOV DX, OFFSET prompt
+    CALL printMessage
+    CALL nextLine
+
+RET
+calculateW ENDP
+
+;This method prints the value of w on the scree
+printW PROC
+   ;Printing the Initial Promp
+   mov dx, offset answer
+   call printMessage
+   
+   
+   
+   ;This loop gets the counter as the number of digits
+      mov ax, w
+   step1:   
+      mov dx, 0
+      mov cx, 0
+      mov bx, 10
+      div bx
+      add dx, 0x30
+      push dx; pushing the remainder in stack
+      inc cx
+      cmp ax, 0 ;Checking to see if the quiotent is zero
+      jnZ step1
+   
+   ;This loop prints values of w on the scree.   
+   step2:
+      pop dx
+      mov ax, dx
+      mov ah, 06h
+      mov dl, al
+      int 21h
+      Loop step2
+    
+                      
+RET
+printW ENDP
+
+
+      END main
+
+shazimajaz@gmail.com

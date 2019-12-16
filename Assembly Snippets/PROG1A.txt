@@ -1,0 +1,33 @@
+; Shazim Ajaz
+; CSC 35
+; Dr. Ganash
+; Todays Date
+; Weds 1/31/18
+; Lab Section 11
+; Program # 0
+; ---------Program Starts Here---------
+.model tiny
+.dosseg
+.data
+.code
+.startup
+
+
+main proc
+mov al, 9
+mov bl, 37; This is comment
+mov bh, 0
+add bh, al
+add bh, bl; Comments appear after semicolon
+mov  cx, 0
+inc cx
+dec  cx
+inc al ; This is comment
+sub bl, al
+add bh, al
+add bh, cl
+MOV AX, 4C00h
+INT 21h
+main endp
+end
+;---------Program Ends Here----------

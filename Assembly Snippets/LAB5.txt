@@ -1,0 +1,172 @@
+;Shazim Ajaz
+;CSC 35 SPring 2018 Issac Ghansah
+;Date Created 02/21/18
+;lab 5
+.model small
+.stack 100h
+.data
+	loc dw ?
+	x dw 0
+	y dw 0
+	sum dw ?
+	w dw ?
+	tem dw 0
+	prev dw 0
+	m1 db "Enter the Value For X: ", "$"
+	m2 db "Enter the Value For Y: ", "$"
+	newline db "  ", 0dh, 0ah, "$"
+	answer db "Output W = ", "$"
+	value dw 0 ; This variable will be used as return in the method 
+	prompt db "Calculating Output", "$"
+
+.code
+main proc
+	mov ax, @data ; set up data segment register
+	mov ds, ax
+
+	;Getting values of x
+	mov dx, offset m1
+	call printMessage ; call of this message will print the value in dx
+	call getValue
+	mov ax, value
+	mov x, ax
+	call nextLine
+
+	;Getting values of y
+	mov dx, offset m2
+	call printMessage
+	call getValue
+	mov ax, value
+	mov y, ax
+	call nextLine
+
+	call calculateW ; This call will do all the instruction 
+	call printPrompt ; This call will print the required prompt on the screen 
+	call nextLine ; This will move the control over to the nextLine
+	call outputW
+	mov ax, 4c00h  ; resetting the value of ax as default
+	Int 21h
+	Main endp  ; end of procedure
+
+;this procedure moves the cursor to the nextLine on the screen
+nextLine proc
+	mov ah, 09
+	mov dx, offset newLine
+	int 21h
+
+ret
+nextLine endp
+
+;this porcedure prints the message on the screen with offset in dx
+printMessage proc
+	mov ah, 09
+	; the value that will be moved to the dx will print
+	int 21h
+
+
+ret
+printMessage endp
+
+;this asks the user for the values of upto 4 digits
+getValue proc
+	mov ax, 0
+	mov bx, 0
+	mov cx, 4
+	mov tem, 0
+	mov value, 0
+L1:
+	mov ah, 01 ; ah = 07 to input values from the user
+	int 21h ; calling the function
+	sub al, 30h
+	mov ah, 0
+	mov tem, ax
+
+	mov ax, value
+	mov bx, 10
+	mul bx
+	add ax, tem
+	mov value, ax
+	loop L1
+
+
+ret
+getValue endp
+
+;This will do all the desired calculation
+calculateW proc
+	;performing loc y * 160 + x * 2
+	mov ax, 160
+	mul y
+	mov tem, ax
+	mov ax, 2
+	mul x
+	add ax, tem
+	mov loc, ax
+
+	;performing sum = loc/4 + 4
+	mov y, 1000
+	dec y
+	mov dx, 0
+	mov ax, loc
+	mov bx, 16
+	div bx
+	mov tem, ax
+	add ax, y
+
+	; y/4
+	mov sum, ax
+	mov ax, y
+	mov dx, 0
+	mov bx, 4
+	div bx
+	add sum, ax
+
+	;doing y/200
+	mov ax, y
+	mov dx, 0
+	mov bx, 200
+	div bx
+	add sum, ax
+
+	;performing w= sum % 7 + 5
+	mov dx, 0
+	mov ax, sum
+	mov bx, 7
+	div bx
+	mov ax, dx
+	add ax, 30h
+	add ax, 5
+	mov ah, 0
+	mov w, ax
+
+
+
+ret
+calculateW endp
+
+;This method prints w on the screen
+outputW proc
+    mov ax, 0
+    mov ah, 09
+    mov dx, offset answer
+    int 21h
+    
+    mov ah, 06
+    mov dh, 0
+    mov dx, w
+    int 21h
+
+ret 
+outputW endp
+
+;The procedure prints calculating w string on the screen. 
+printPrompt proc
+
+    mov ax, 0
+    mov ah, 09
+    mov dx, offset prompt
+    int 21h    
+ret
+printPrompt endp
+		End main   ; end of the main program.
+                                                      

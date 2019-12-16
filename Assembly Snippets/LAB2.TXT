@@ -1,0 +1,28 @@
+;Shazim Ajaz
+;CSC-35
+;Spring 2018
+;Dr Ghansah
+;2/07/18
+;Lab Section: 11
+;Program # 1
+;
+;This program displays "Hello CSc35 students"/
+.model small
+.stack 100h
+.data
+message db "Hello CSc35 students", 0dh, 0ah
+	db "Shazim Ajaz,CSC 35, Spring 2018", "$" ; This is the message that will be printed
+
+.code
+Main proc
+	mov ax, @data
+	mov ds, ax
+
+	mov ah, 9; moves 9 to ah register
+	mov dx, offset message; here the message above will be stored in dx register
+
+
+    mov AX, 4C00H
+    int 21H
+    Main endp
+	End main

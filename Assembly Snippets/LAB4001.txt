@@ -1,0 +1,142 @@
+;Shazim Ajaz
+;CSC 35 SPring 2018 Issac Ghansah
+;Date Created 02/21/18
+;lab 3
+.model small
+.stack 100h
+.data
+	loc dw ?
+	x dw 0
+	y dw 0
+	sum dw ?
+	w dw ?
+	tem dw 0
+	prev dw 0
+	m1 db "Enter the Value For X: ", "$"
+	m2 db "Enter the Value For Y: ", "$"
+	newline db "  ", 0dh, 0ah, "$"
+	answer db "W = ", "$"
+
+.code
+main proc
+	mov ax, @data ; set up data segment register
+	mov ds, ax
+
+	;Getting values of x
+	mov ah, 09;
+	mov dx, offset m1
+	int 21h
+
+	mov cx, 4
+    L1:	;Getting the value from the user with ECO
+	mov ah, 01 ; ah =  07 to input values from the user
+	int 21h    ; Calling the Function
+	sub al, 30h ; Converting the Value of Kb input to decimal
+	mov ah, 0   ; moving 0 to ah to use ax reg
+	mov tem,ax  ; Value from the Uer
+
+	mov ax, x
+	mov bx, 10
+	mul bx
+	add ax, tem
+	mov x, ax
+	loop L1
+
+	;These lines print newline on the screen
+	mov ah, 09  ; to use the function with echo
+	mov dx, offset newline
+	int 21h
+
+	;Getting the Value of y
+	mov dx, 0
+	mov ax, 0
+
+	;Prompt for the User
+	mov ah, 09
+	mov dx, offset m2
+	int 21h
+
+
+	mov cx, 4 ; Loop counter set to 4
+   L2:	;Getting Value from the User with ECO
+	mov ah, 01
+	int 21h
+	mov ah, 0
+	sub ax, 30h
+	mov tem, ax ; saving the value of ax into tem
+
+	mov ax, y
+	mov bx, 10
+	mul bx
+	add ax, tem
+	mov y, ax
+	loop l2
+
+	;Moving the Control to the Next Line
+	mov ah, 09
+	mov dx, offset	newline
+	int 21h
+
+	;Performing loc	= y * 160 + x * 2
+	mov ax, 160 ; moving 160 to ax register
+	mul y	    ; multiplying y with ax register and saving result in ax
+	mov tem, ax ; moving result of the ax register to the tem memory
+	mov ax, 2   ; moving 2 to the ax
+	mul x	    ; multiplying x with ax and storing result in ax.
+	add ax, tem ; adding the values of ax and tem memory and storing the result in ax
+	mov loc, ax ; saving the result of the first expression in loc
+
+	;Performing sum = loc/4 + y
+	mov y, 1000	; set y = 1000
+	dec y	    ; do y = y - 1
+	mov dx, 0   ; mov 0 to dx
+	mov ax, loc ; setting the value of ax = loc
+	mov bx, 16  ; moving 16  to bx
+	div bx	    ; dividing ax by bx and stroign the qutione in ax and remainder in dx
+	mov tem, ax ; Saving the value of ax in tem variable
+	add ax, y   ; adding the value of y to ax
+
+	; y /4
+	mov sum, ax ; saving the value of ax in sum
+	mov ax, y   ; moving the value of y into ax
+	mov dx, 0   ; moving the value of 0 into dx
+	mov bx, 4   ; moving the value of 4 into bx
+	div bx;     ; diving ax by bx
+	add sum, ax ; adding the value of ax to the sum
+
+	; doing y /200
+	mov ax, y   ; moving the value of y in ax
+	mov dx, 0   ; moving the value of dx into 0
+	mov bx, 200 ; moving the value of 200 in bx
+	div bx	    ; dividing the ax by bx and the result will go in ax and dx
+	add sum, ax ; adding the value of ax into sum
+
+	;Performing W = sum % 7 + 5
+	mov dx, 0   ; setting dx = 0
+	mov ax, sum ; ax = sum
+	mov bx, 7   ; bx = 7
+	div bx\	    ; divind ax / bx and storing the remainder in dx and qutioent in ax
+	mov ax,  dx ; moving the value of dx to ax
+	add ax, 30h	 ; adding 5 to ax
+	add ax, 5
+	mov ah, 0
+	mov w, ax
+
+	;Printing the Result On the Screen
+	mov ax, 0
+	mov ah, 09
+	mov dx, offset answer
+	int 21h
+
+
+	mov ah, 06h
+	mov dh, 0
+	mov dx, w
+	Int 21h
+
+
+
+	mov ax, 4c00h  ; resetting the value of ax as default
+	Int 21h
+	Main endp  ; end of procedure
+		End main   ; end of the main program.
